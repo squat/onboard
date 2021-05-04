@@ -1,0 +1,70 @@
+checks:
+- name: dns
+  dns:
+    value: api
+- name: cluster
+  systemd:
+    unit: kubeadm-join.service
+    description: Joining Cluster
+values:
+- name: ssid
+  description: Wireless Network Name
+- name: psk
+  description: Wireless Network Password
+  secret: true
+- name: hostname
+  description: Hostname
+- name: sshkey
+  description: SSH Key
+- name: api
+  description: k8s API Server Endpoint
+- name: ca_cert_hash
+  description: k8s CA Certificate Hash
+- name: token
+  description: k8s Bootstrap Token
+- name: registry
+  description: Unqualified Container Registry
+actions:
+- name: hostname
+  file:
+    path: etchostname
+    value: hostname
+- name: wpa_supplicant-config
+  file:
+    path: etcwpa_supplicantwpa_supplicant-wlan0.conf
+    template: |
+        network={
+            ssid="{{.ssid}}"
+            psk="{{.psk}}"
+        }
+- name: sshkey
+  file:
+    path: homeonboard.sshauthorized_keys
+    value: sshkey
+- name: containers-registries
+  file:
+    path: etccontainersregistries.conf
+    template: |
+      unqualified-search-registries = ["{{.registry}}"]
+- name: restart-crio
+  systemd:
+    unit: pipewire.service
+    command: restart
+- name: kubeadm-config
+  file:
+    path: varlibkubeadmconfig.yaml
+    template: |
+      apiVersion: kubeadm.k8s.io/v1beta2
+      kind: JoinConfiguration
+      discovery:
+        bootstrapToken:
+          apiServerEndpoint: {{.api}}
+          token: {{.token}}
+          caCertHashes:
+          - {{.ca_cert_hash}}
+      nodeRegistration:
+        name: {{.hostname}}
+      ---
+      apiVersion: kubelet.config.k8s.io/v1beta1
+      kind: KubeletConfiguration
+      cgroupDriver: systemd

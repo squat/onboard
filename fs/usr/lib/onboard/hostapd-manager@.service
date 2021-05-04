@@ -1,0 +1,15 @@
+[Unit]
+Description=Manage hostapd for an access point
+
+[Service]
+ExecStart=/usr/bin/sh -c 'done=true; while IFS="" read -r df || [ -n "$df" ]; do \
+                            if [ ! -e "$df" ]; then done=false; break; fi \
+                        done < /etc/onboard/done-files; \
+                        if [ "$done" = "true" ] && [ "$(cat /var/lib/onboard/network)" = "up" ]; then \
+                            if systemctl is-active hostapd@%i --quiet; then systemctl stop hostapd@%i; fi; \
+                        else \
+                            if ! systemctl is-active hostapd@%i --quiet; then systemctl start hostapd@%i; fi \
+                        fi'
+
+[Install]
+WantedBy=multi-user.target

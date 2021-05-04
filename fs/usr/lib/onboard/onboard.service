@@ -1,0 +1,10 @@
+[Unit]
+Description=Run the Onboard service
+After=network.target
+
+[Service]
+EnvironmentFile=/var/lib/onboard/onboard.env
+ExecStart=/usr/bin/onboard --web.listen 10.0.0.1:80 --id ${UUID} --config /etc/onboard/*.yaml
+
+[Install]
+WantedBy=multi-user.target

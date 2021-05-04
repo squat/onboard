@@ -1,0 +1,9 @@
+[Unit]
+Description=Host an access point on a WLAN interface
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/hostapd -i %i /usr/lib/onboard/hostapd.conf
+
+[Install]
+WantedBy=multi-user.target

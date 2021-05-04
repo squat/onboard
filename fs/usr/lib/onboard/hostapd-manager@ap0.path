@@ -1,0 +1,8 @@
+[Unit]
+Description=Trigger the hostapd-manager@ap0 unit when the network status changes
+
+[Path]
+PathChanged=/var/lib/onboard/network
+
+[Install]
+WantedBy=multi-user.target

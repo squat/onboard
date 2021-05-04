@@ -1,0 +1,15 @@
+[Unit]
+Description=Configure virtual WLAN interface for use as an AP
+Requires=sys-subsystem-net-devices-wlan0.device
+After=sys-subsystem-net-devices-wlan0.device
+Before=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/iw dev wlan0 interface add %i type __ap
+ExecStop=/usr/bin/iw dev %i del
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,21 @@
+values:
+- name: ssid
+  description: Wireless Network Name
+- name: psk
+  description: Wireless Network Password
+  secret: true
+- name: hostname
+  description: Hostname
+actions:
+- name: hostname
+  file:
+    path: /etc/hostname
+    value: hostname
+- name: wpa_supplicant-config
+  file:
+    path: /etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+    template: |
+        network={
+            ssid="{{.ssid}}"
+            psk="{{.psk}}"
+        }

@@ -1,0 +1,6 @@
+enable ap@.service ap0
+enable hostapd-manager@ap0.path
+enable onboard.service
+enable ping@.service 1.1.1.1
+enable systemd-timesyncd.service
+enable wpa_supplicant@wlan0.path

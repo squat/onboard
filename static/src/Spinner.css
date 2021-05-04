@@ -1,0 +1,54 @@
+.spinner-container {
+    filter: url(#gooey);
+    position: relative;
+}
+
+.spinner-container svg {
+    display: none;
+}
+
+.spinner-path {
+    width: 8em;
+    height: 8em;
+}
+  
+.spinlet {
+    animation: spinner 3s infinite;
+    position: relative;
+    top: 50%;
+} 
+
+.spinlet:after {
+    background: #3b3b3b;
+    content: " ";
+    display: block;
+    position: absolute;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+}
+
+.spinlet:nth-child(1) {
+    animation-delay: .5s;
+}
+    
+.spinlet:nth-child(2) {
+    animation-delay: 1s;
+}
+    
+.spinlet:nth-child(3) {
+    animation-delay: 1.5;
+}
+
+.spinlet:nth-child(4) {
+    animation-delay: 2s;
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

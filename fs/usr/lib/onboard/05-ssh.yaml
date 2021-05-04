@@ -1,0 +1,8 @@
+values:
+- name: sshkey
+  description: SSH Key
+actions:
+- name: sshkey
+  file:
+    path: /home/onboard/.ssh/authorized_keys
+    value: sshkey

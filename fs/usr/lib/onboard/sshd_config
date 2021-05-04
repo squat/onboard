@@ -1,0 +1,10 @@
+PermitRootLogin no
+MaxAuthTries 3
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+KerberosAuthentication no
+GSSAPIAuthentication no
+X11Forwarding no
+PermitUserEnvironment no
+AuthorizedKeysFile .ssh/authorized_keys
+PubkeyAuthentication yes

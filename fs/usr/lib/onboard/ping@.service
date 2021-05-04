@@ -1,0 +1,15 @@
+[Unit]
+Description=Ping the given address and record successes in a file
+
+[Service]
+ExecStart=/usr/bin/ping -c 1 -w 1 %i
+ExecStopPost=/usr/bin/sh -c 'if [ "$SERVICE_RESULT" = "success" ]; then \
+                                echo "up" > /var/lib/onboard/network; \
+                            else \
+                                echo "down" > /var/lib/onboard/network; \
+                            fi'
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

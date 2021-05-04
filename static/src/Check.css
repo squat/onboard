@@ -1,0 +1,21 @@
+.check {
+    display: flex;
+}
+
+.check-group {
+    width: 100%;
+}
+
+.check-group .check {
+    justify-content: center;
+    transition-duration: 0.3s;
+    transition-property: all;
+}
+
+.check-error {
+    font-style: italic;
+    font-size: .5em;
+    position: absolute;
+    top: 100%;
+    transform: translateY(100%);
+}

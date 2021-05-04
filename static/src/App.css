@@ -1,0 +1,47 @@
+.app {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+}
+.header {
+    align-self: flex-start;
+    position: absolute;
+}
+h1 {
+    cursor: default;
+    font-size: 2.5em;
+    font-style: italic;
+}
+.line::after {
+    content: '—';
+    display: block;
+}
+.blur-enter, .blur-exit.blur-exit-active, .blur-appear,
+.localblur-enter, .localblur-exit.localblur-exit-active, .localblur-appear {
+    filter: blur(30px);
+    pointer-events: none;
+    opacity: 0;
+}
+
+.blur-enter.blur-enter-active, .blur-exit, .blur-appear.blur-appear-active,
+.localblur-enter.localblur-enter-active, .localblur-exit, .localblur-appear.localblur-appear-active {
+    filter: none;
+    pointer-events: auto;
+    opacity: 1;
+}
+
+.blur-enter-active, .blur-exit-active, .blur-appear-active,
+.localblur-enter-active, .localblur-exit-active, .localblur-appear-active {
+    transition-duration: 0.3s;
+    /*transition-duration: 15s;*/
+    transition-property: all;
+}
+
+/* .blur-enter, .blur-exit { */
+.blur-exit {
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -100%);
+    width: 100%;
+}

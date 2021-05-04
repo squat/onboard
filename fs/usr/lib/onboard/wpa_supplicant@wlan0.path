@@ -1,0 +1,9 @@
+[Unit]
+Description=Trigger the wpa_supplicant@wlan0 unit when the configuration file changes
+
+[Path]
+PathExists=/etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+PathChanged=/etc/wpa_supplicant/wpa_supplicant-wlan0.conf
+
+[Install]
+WantedBy=multi-user.target

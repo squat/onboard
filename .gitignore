@@ -1,0 +1,7 @@
+.cache/
+.container*
+.manifest*
+.push*
+bin/
+tmp/
+/statik
