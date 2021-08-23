@@ -1,36 +1,26 @@
 #!/bin/bash
 
-_() {
 set -euo pipefail
+INSTALL=$(which install)
 
-_curl() {
-    # This function overrides the cURL command by
-    # first printing ... to STDERR to indicate
-    # that we are waiting.
-    # Once the command completes, we clear the screen.
-    echo -n '...' >&2
-    curl --silent --fail "$@"
-    echo -ne '\r' >&2
-}
-
-install_kubeadm() {
+install() {
     pushd "$WORKING_DIRECTORY"
     echo "Determining Kubernetes release"
     RELEASE="$(_curl --location https://dl.k8s.io/release/stable.txt)"
     echo "Downloading Kubernetes binaries"
     _curl --location --remote-name-all https://storage.googleapis.com/kubernetes-release/release/"$RELEASE"/bin/linux/"$ARCH"/{kubeadm,kubelet,kubectl}
     _curl --location https://github.com/kubernetes-sigs/cri-tools/releases/download/"$RELEASE"/crictl-"$RELEASE"-linux-"$ARCH".tar.gz | tar xz
-    sudo install -m 755 kubeadm kubelet kubectl crictl root/usr/bin
+    sudo "$INSTALL" -m 755 kubeadm kubelet kubectl crictl root/usr/bin
     echo "Downloading runc"
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/runc-1.0.0rc93-2-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/runc-1.0.1-2-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
     echo "Downloading CRI-O"
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/cri-o-1.21.0-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/cri-o-1.21.2-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc
     echo "Downloading conmon"
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/conmon-1:2.0.27-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/conmon-1:2.0.29-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
     #echo "Downloading CNI plugins"
     #_curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/cni-plugins-0.9.1-3-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc opt
     echo "Downloading containers common"
-    _curl --location https://archlinuxarm.org/armv7h/community/containers-common-0.37.1-1-any.pkg.tar.xz | sudo tar xJv -C root usr etc var
+    _curl --location https://archlinuxarm.org/armv7h/community/containers-common-0.43.2-1-any.pkg.tar.xz | sudo tar xJv -C root usr etc var
     echo "Downloading conntrack"
     _curl --location https://archlinuxarm.org/"$ARCH_FULL"/extra/conntrack-tools-1.4.6-2-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc
     RELEASE_VERSION="v0.4.0"
@@ -39,13 +29,13 @@ install_kubeadm() {
     sudo mkdir -p root/etc/systemd/system/kubelet.service.d
     echo "Downloading kubeadm systemd configuration"
     _curl --location --remote-name-all "https://raw.githubusercontent.com/kubernetes/release/$RELEASE_VERSION/cmd/kubepkg/templates/latest/deb/kubeadm/10-kubeadm.conf"
-    sudo install -D -m 644 10-kubeadm.conf root/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
+    sudo "$INSTALL" -D -m 644 10-kubeadm.conf root/etc/systemd/system/kubelet.service.d/10-kubeadm.conf
     cat <<EOF | sudo tee root/usr/lib/systemd/system-preset/50-kubeadm.preset
 enable kubelet.service
 enable kubeadm-join.path
 enable crio.service
 EOF
-    sudo install -D -m 644 kubelet.service root/etc/systemd/system/kubelet.service
+    sudo "$INSTALL" -D -m 644 kubelet.service root/etc/systemd/system/kubelet.service
     cat <<'EOF' | sudo tee root/etc/systemd/system/kubeadm-join.service
 [Unit]
 Description=Join a Kubernetes cluster with kubeadm
@@ -139,19 +129,10 @@ actions:
 EOF
 }
 
-case $1 in
-    install)
-        install_kubeadm;;
-
-    done-file)
-        echo /var/lib/kubeadm/join.done;;
-
-    kernel-command-line)
-        echo cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1;;
-
-    *)
-        exit 1;;
-esac
+done-file() {
+    echo /var/lib/kubeadm/join.done
 }
 
-_ "$@"
+kernel-command-line() {
+    echo cgroup_enable=cpuset cgroup_enable=memory cgroup_memory=1
+}

@@ -233,7 +233,8 @@ install_os_bpim2z() {
     local commandline=
     for h in $HOOKS; do
         local kcl
-        if kcl=$("$h" kernel-command-line); then
+        # shellcheck disable=SC1090
+        if kcl=$(. "$h" && kernel-command-line); then
             commandline="$commandline $kcl"
         fi
     done
@@ -287,7 +288,8 @@ install_os_rpi() {
     local commandline=
     for h in $HOOKS; do
         local kcl
-        if kcl=$("$h" kernel-command-line); then
+        # shellcheck disable=SC1090
+        if kcl=$(. "$h" && kernel-command-line); then
             commandline="$commandline $kcl"
         fi
     done
@@ -301,7 +303,7 @@ download_onboard() {
     fi
     ONBOARD_PATH=$(mktemp -d)
     echo "Downloading Onboard"
-    _curl --location https://github.com/squat/onboard/archive/master.tar.gz | sudo tar xvz --strip-components=1 -C "$ONBOARD_PATH" onboard-master/usr onboard-master/var
+    _curl --location https://github.com/squat/onboard/archive/main.tar.gz | sudo tar xvz --strip-components=1 -C "$ONBOARD_PATH" onboard-master/usr onboard-master/var
 }
 
 compile_onboard() {
@@ -336,7 +338,8 @@ install_onboard() {
     sudo touch root/etc/onboard/done-files
     for h in $HOOKS; do
         local df
-        if df=$("$h" done-file); then
+        # shellcheck disable=SC1090
+        if df=$(. "$h" && done-file); then
             echo "$df" | sudo tee --append root/etc/onboard/done-files > /dev/null
         fi
     done
@@ -357,7 +360,8 @@ install_hooks() {
     pushd "$WORKING_DIRECTORY"
     sudo mount "$ROOT_PARTITION" root
     for h in $HOOKS; do
-        WORKING_DIRECTORY="$WORKING_DIRECTORY" ARCH="$ARCH" ARCH_FULL="$ARCH_FULL" "$h" install
+        # shellcheck disable=SC1090
+        (. "$h" && WORKING_DIRECTORY="$WORKING_DIRECTORY" ARCH="$ARCH" ARCH_FULL="$ARCH_FULL" install)
     done
     sudo umount root
 }

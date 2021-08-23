@@ -1,18 +1,13 @@
 #!/bin/bash
 
-_() {
-set -euo pipefail
-
-case $1 in
-    install)
-        ;;
-
-    kernel-command-line)
-        echo dtoverlay=hifiberry-dac;;
-
-    *)
-        exit 1;;
-esac
+install() {
+    exit 0
 }
 
-_ "$@"
+done-file() {
+    exit 1
+}
+
+kernel-command-line() {
+    echo dtoverlay=hifiberry-dac
+}
