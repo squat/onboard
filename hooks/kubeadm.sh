@@ -6,7 +6,8 @@ INSTALL=$(which install)
 install() {
     pushd "$WORKING_DIRECTORY"
     echo "Determining Kubernetes release"
-    RELEASE="$(_curl --location https://dl.k8s.io/release/stable.txt)"
+    #RELEASE="$(_curl --location https://dl.k8s.io/release/stable.txt)"
+    RELEASE="v1.21.0"
     echo "Downloading Kubernetes binaries"
     _curl --location --remote-name-all https://storage.googleapis.com/kubernetes-release/release/"$RELEASE"/bin/linux/"$ARCH"/{kubeadm,kubelet,kubectl}
     _curl --location https://github.com/kubernetes-sigs/cri-tools/releases/download/"$RELEASE"/crictl-"$RELEASE"-linux-"$ARCH".tar.gz | tar xz
