@@ -13,15 +13,13 @@ install() {
     _curl --location https://github.com/kubernetes-sigs/cri-tools/releases/download/"$RELEASE"/crictl-"$RELEASE"-linux-"$ARCH".tar.gz | tar xz
     sudo "$INSTALL" -m 755 kubeadm kubelet kubectl crictl root/usr/bin
     echo "Downloading runc"
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/runc-1.0.1-2-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/runc-1.1.1-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
     echo "Downloading CRI-O"
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/cri-o-1.21.2-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/cri-o-1.23.2-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc
     echo "Downloading conmon"
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/conmon-1:2.0.29-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
-    #echo "Downloading CNI plugins"
-    #_curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/cni-plugins-0.9.1-3-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc opt
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/conmon-1:2.1.0-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
     echo "Downloading containers common"
-    _curl --location https://archlinuxarm.org/armv7h/community/containers-common-0.43.2-1-any.pkg.tar.xz | sudo tar xJv -C root usr etc var
+    _curl --location https://archlinuxarm.org/armv7h/community/containers-common-1:0.47.4-3-any.pkg.tar.xz | sudo tar xJv -C root usr etc var
     echo "Downloading conntrack"
     _curl --location https://archlinuxarm.org/"$ARCH_FULL"/extra/conntrack-tools-1.4.6-2-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc
     RELEASE_VERSION="v0.4.0"

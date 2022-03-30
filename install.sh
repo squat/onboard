@@ -350,9 +350,9 @@ install_wlan() {
     pushd "$WORKING_DIRECTORY"
     sudo mount "$ROOT_PARTITION" root
     echo "Downloading WLAN packages"
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/core/wpa_supplicant-2:2.9-8-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/hostapd-2.9-5-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root var usr etc
-    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/core/iw-5.9-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/core/wpa_supplicant-2:2.10-3-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr etc
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/community/hostapd-2.10-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root var usr etc
+    _curl --location https://archlinuxarm.org/"$ARCH_FULL"/core/iw-5.16-1-"$ARCH_FULL".pkg.tar.xz | sudo tar xJv -C root usr
     sudo umount root
 }
 
