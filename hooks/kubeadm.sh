@@ -2,12 +2,20 @@
 
 set -euo pipefail
 INSTALL=$(which install)
+RELEASE="$(_curl --location https://dl.k8s.io/release/stable.txt)"
+
+determine_release() {
+    echo "The latest available Kubernetes version is:"
+    echo ""
+    printf "\t%s\n" "$RELEASE"
+    echo ""
+    RELEASE=$(prompt "What version would you like to install?" "$RELEASE")
+}
 
 install() {
     pushd "$WORKING_DIRECTORY"
     echo "Determining Kubernetes release"
-    #RELEASE="$(_curl --location https://dl.k8s.io/release/stable.txt)"
-    RELEASE="v1.21.0"
+    determine_release
     echo "Downloading Kubernetes binaries"
     _curl --location --remote-name-all https://storage.googleapis.com/kubernetes-release/release/"$RELEASE"/bin/linux/"$ARCH"/{kubeadm,kubelet,kubectl}
     _curl --location https://github.com/kubernetes-sigs/cri-tools/releases/download/"$RELEASE"/crictl-"$RELEASE"-linux-"$ARCH".tar.gz | tar xz
