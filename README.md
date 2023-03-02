@@ -1,12 +1,26 @@
 # Onboard
 
 `onboard` is a tool designed to help you connect single board computers (SBCs), such as Raspberry Pis, to your fleet of IoT devices.
-It provides a configurable wizard via a webapp to input all of the information needed to connect the device to a wireless network and to start the services you need.
+It provides a configurable wizard via a webapp to collect all of the information needed to configure the device, such as connecting to a wireless network and starting the services you need.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/squat/onboard)](https://goreportcard.com/report/github.com/squat/onboard)
 
 ## Overview
 
+`onboard` provides two main pieces of functionality to connect your IoT devices to your fleet:
+1. a programmable and extensible service for configuring the IoT device; this service:
+    1. runs a webapp that guides the user through a wizard in order to provide any necessary inputs;
+    2. executes the requested operations on the host, such as provisioning files and running systemd units;
+    3. verifies the proper operation of the host by running a series of configured checks; and
+    4. surfaces the status and progress of the configuration process to the user through the webapp.
+
+2. a minimalist base OS for the IoT device built on [Arch Linux Arm](https://archlinuxarm.org/) that can be installed using the [`install.sh`](https://github.com/squat/onboard/blob/master/install.sh) script; this base OS:
+    1. starts a wireless access point with an open wireless network named `onboard`;
+    2. runs the `onboard` configuration wizard webapp at [http://onboard.local/](http://onboard.local/);
+    3. configures the IoT device using the collected inputs to connect to a desired wireless network;
+    4. runs any other actions specified via the `onboard` configuration files, such as starting additional systemd services;
+    5. disables the wireless access point once the network connection has been successfully established; and
+    5. periodically checks if the network is inaccessible, in which case it re-enables the wireless access point so that the device can be reconfigured.
 
 ## Getting Started
 
