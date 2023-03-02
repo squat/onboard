@@ -99,9 +99,12 @@ func (a *Action) action() func(map[string]string) error {
 type FileAction struct {
 	// Path is the location on disk where the file should ultimately be written.
 	Path string `json:"path"`
-	// Value is the literal contents of the file. This field is mutually exclusive with `Template`.
+	// Value is the name of a value collected by Onboard.
+	// The resulting file will consist solely of the value.
+	// This field is mutually exclusive with `Template`.
 	Value *string `json:"value"`
-	// Template is a file path pointing to a Golang template for the file. This field is mutually exclusive with `Value`.
+	// Template is a Golang template for the file.
+	// This field is mutually exclusive with `Value`.
 	Template *string `json:"template"`
 	t        *template.Template
 }
