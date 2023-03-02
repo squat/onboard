@@ -1,4 +1,4 @@
-export GO111MODUL:1.15-alpineE=on
+export GO111MODULE=on
 .PHONY: push container clean container-name container-latest push-latest fmt lint test unit vendor header manifest manfest-latest manifest-annotate manifest manfest-latest manifest-annotate
 
 ARCH ?= amd64
@@ -28,9 +28,8 @@ GO_PKGS ?= $$(go list ./... | grep -v "$(PKG)/vendor")
 
 GOLINT_BINARY := bin/golint
 EMBEDMD_BINARY := bin/embedmd
-STATIK_BINARY := bin/statik
 
-BUILD_IMAGE ?= golang:1.13.4-alpine
+BUILD_IMAGE ?= golang:1.19.0-alpine
 
 build: $(BINS)
 
@@ -59,7 +58,7 @@ all-container-latest: $(addprefix container-latest-, $(ALL_ARCH))
 
 all-push-latest: $(addprefix push-latest-, $(ALL_ARCH))
 
-$(BINS): $(SRC) go.mod
+$(BINS): $(SRC) go.mod static/build/index.html
 	@mkdir -p bin/$(ARCH)
 	@echo "building: $@"
 	@docker run --rm \
@@ -76,16 +75,8 @@ $(BINS): $(SRC) go.mod
 		    $(LD_FLAGS) \
 		    . \
 	    "
-generate: client deepcopy informer lister openapi grpc grpc-gateway statik
-
-statik: statik/statik.go
-statik/statik.go: $(STATIK_BINARY) static/build/index.html
-	$(STATIK_BINARY) -src=./static/build -f -m
-	printf "%s\n%s" "$$(sed "s/YEAR/$$(date +%Y)/g" .header)" "$$(cat $@)" > $@
-
-
 static-build: static/build/index.html
-static/build/index.html: $(STATIK_BINARY) $(STATIC_SRC) static/node_modules
+static/build/index.html: $(STATIC_SRC) static/node_modules
 	yarn --cwd static run build
 
 static/src/fonts.css:
@@ -241,6 +232,3 @@ $(GOLINT_BINARY): go.mod go.sum
 
 $(EMBEDMD_BINARY): go.mod go.sum
 	go build -mod=vendor -o $@ github.com/campoy/embedmd
-
-$(STATIK_BINARY): go.mod go.sum
-	go build -mod=vendor -o $@ github.com/rakyll/statik

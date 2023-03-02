@@ -28,19 +28,30 @@ import (
 var validName = regexp.MustCompile(`^[a-zA-Z_]+[a-zA-Z0-9_-]*$`)
 var validUnitName = regexp.MustCompile(`^([a-zA-Z0-9:._-]+@)?[a-zA-Z0-9:._-]+(\.service|\.socket|\.device|\.mount|\.automount|\.swap|\.target|\.path|\.timer|\.slice|\.scope)$`)
 
+// SystemdCommand is a valid systemd command.
 type SystemdCommand string
 
 const (
-	SystemdCommandStart   SystemdCommand = "start"
-	SystemdCommandStop    SystemdCommand = "stop"
+	// SystemdCommandStart starts a unit.
+	SystemdCommandStart SystemdCommand = "start"
+	// SystemdCommandStop stops a unit.
+	SystemdCommandStop SystemdCommand = "stop"
+	// SystemdCommandRestart restarts a unit.
 	SystemdCommandRestart SystemdCommand = "restart"
-	SystemdCommandEnable  SystemdCommand = "enable"
+	// SystemdCommandEnable enables a unit.
+	SystemdCommandEnable SystemdCommand = "enable"
+	// SystemdCommandDisable disables a unit.
 	SystemdCommandDisable SystemdCommand = "disable"
 )
 
+// Action represents an operation that Onboard should perform.
 type Action struct {
-	Name    string         `json:"name"`
-	File    *FileAction    `json:"file"`
+	// Name is a unique name for the action. It must be unique
+	// across all actions in all snippets of configurations that are loaded.
+	Name string `json:"name"`
+	// File is an action that provisions a file.
+	File *FileAction `json:"file"`
+	// Systemd is an action that performs an operation on a systemd unit.
 	Systemd *SystemdAction `json:"systemd"`
 }
 
@@ -84,9 +95,13 @@ func (a *Action) action() func(map[string]string) error {
 	return nil
 }
 
+// FileAction is an action that provisions a file, either from a literal value or based on a template.
 type FileAction struct {
-	Path     string  `json:"path"`
-	Value    *string `json:"value"`
+	// Path is the location on disk where the file should ultimately be written.
+	Path string `json:"path"`
+	// Value is the literal contents of the file. This field is mutually exclusive with `Template`.
+	Value *string `json:"value"`
+	// Template is a file path pointing to a Golang template for the file. This field is mutually exclusive with `Value`.
 	Template *string `json:"template"`
 	t        *template.Template
 }
@@ -126,7 +141,7 @@ func (f *FileAction) validate(values []*Value) error {
 		}
 	}
 	if n != 1 {
-		errs = append(errs, "exactly one of 'file' or 'template' must be specified")
+		errs = append(errs, "exactly one of 'value' or 'template' must be specified")
 	}
 	if len(errs) > 0 {
 		return errors.New(strings.Join(errs, "; "))
@@ -156,8 +171,11 @@ func (f *FileAction) action() func(map[string]string) error {
 	return nil
 }
 
+// SystemdAction is an action that performs a systemd operation on a specified unit.
 type SystemdAction struct {
-	Unit    string         `json:"unit"`
+	// Unit is the name of the unit that should be operated on.
+	Unit string `json:"unit"`
+	// Command is the systemd command that should be executed.
 	Command SystemdCommand `json:"command"`
 }
 
@@ -199,12 +217,19 @@ func (s *SystemdAction) action() func(map[string]string) error {
 	}
 }
 
+// Check represents a validation operation that Onboard should perform once all actions have been executed.
 type Check struct {
-	Name        string        `json:"name"`
-	Systemd     *SystemdCheck `json:"systemd"`
-	GRPC        *GRPCCheck    `json:"gRPC"`
-	DNS         *DNSCheck     `json:"dns"`
-	Description string        `json:"description"`
+	// Name is a unique name for the check. It must be unique
+	// across all checks in all snippets of configurations that are loaded.
+	Name string `json:"name"`
+	// Systemd represents a check on a systemd unit.
+	Systemd *SystemdCheck `json:"systemd"`
+	// GRPC represents a check against a gRPC service.
+	GRPC *GRPCCheck `json:"gRPC"`
+	// DNS represents a check that validates that DNS resolution works.
+	DNS *DNSCheck `json:"dns"`
+	// Description is a human-friendly description of what this check is doing.
+	Description string `json:"description"`
 }
 
 func (c *Check) validate(cfg *config) error {
@@ -243,8 +268,11 @@ func (c *Check) validate(cfg *config) error {
 	return nil
 }
 
+// SystemdCheck is a check that ensures a systemd unit is running.
 type SystemdCheck struct {
-	Unit        string `json:"Unit"`
+	// Unit is the name of the systemd unit that should be checked.
+	Unit string `json:"unit"`
+	// Description is a human-friendly description of what this unit should be doing.
 	Description string `json:"description"`
 }
 
@@ -262,7 +290,9 @@ func (s *SystemdCheck) validate() error {
 	return nil
 }
 
+// DNSCheck is a check that resolves a DNS name into an IP address using the system's configured DNS resolver.
 type DNSCheck struct {
+	// Value is the DNS name that should be resolved.
 	Value string `json:"value"`
 }
 
@@ -278,8 +308,11 @@ func (d *DNSCheck) validate(values []*Value) error {
 	return fmt.Errorf("DNS value %q was not found", d.Value)
 }
 
+// GRPCCheck is a check that verifies that a gRPC service is available.
 type GRPCCheck struct {
-	Name   string `json:"name"`
+	// Name is the name of the gRPC service.
+	Name string `json:"name"`
+	// Socket is the socket that should be used to connect to the gRPC service.
 	Socket string `json:"socket"`
 }
 
@@ -293,10 +326,14 @@ func (g *GRPCCheck) validate() error {
 	return nil
 }
 
+// Value represents an input value that should be gathered by Onboard. Values are made available to templates in order to render files.
 type Value struct {
-	Name        string `json:"name"`
+	// Name is the name of the input.
+	Name string `json:"name"`
+	// Description is a human-friendly description for the input.
 	Description string `json:"description"`
-	Secret      bool   `json:"secret"`
+	// Secret declares whether or not the input is sensitive.
+	Secret bool `json:"secret"`
 }
 
 func (v *Value) validate() error {

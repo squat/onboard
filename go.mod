@@ -1,6 +1,6 @@
 module github.com/squat/onboard
 
-go 1.15
+go 1.16
 
 require (
 	github.com/campoy/embedmd v1.0.0

@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build tools
 // +build tools
 
 package main
 
 import (
 	_ "github.com/campoy/embedmd"
-	_ "github.com/rakyll/statik"
 	_ "golang.org/x/lint/golint"
 )

@@ -28,6 +28,7 @@ import (
 	"github.com/vishvananda/netlink"
 )
 
+// New instantiates a API that conforms to the http.Handler interface.
 func New(r prometheus.Registerer, l log.Logger, id, wlanInterface string, actions []func(map[string]string) error) http.Handler {
 	hi := signalhttp.NewHandlerInstrumenter(r, []string{"handler"})
 	m := http.NewServeMux()

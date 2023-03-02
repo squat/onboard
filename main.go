@@ -16,8 +16,10 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	stdlog "log"
 	"net"
@@ -39,11 +41,9 @@ import (
 	"github.com/metalmatze/signal/internalserver"
 	"github.com/oklog/run"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/rakyll/statik/fs"
 	flag "github.com/spf13/pflag"
 
 	v1 "github.com/squat/onboard/api/v1"
-	_ "github.com/squat/onboard/statik"
 )
 
 type options struct {
@@ -65,6 +65,9 @@ type serverConfig struct {
 	listenInternal string
 	healthcheckURL string
 }
+
+//go:embed static/build
+var static embed.FS
 
 func parseFlags() (*options, error) {
 	opts := &options{}
@@ -179,10 +182,8 @@ func main() {
 	}
 	{
 		knownPaths := map[string]struct{}{
-			"/":       struct{}{},
-			"/ssid":   struct{}{},
-			"/psk":    struct{}{},
-			"/submit": struct{}{},
+			"/":       {},
+			"/submit": {},
 		}
 		j := []byte("{}")
 		var err error
@@ -197,11 +198,11 @@ func main() {
 		if err != nil {
 			stdlog.Fatal(err)
 		}
-		statikFS, err := fs.New()
+		staticFS, err := fs.Sub(static, "static/build")
 		if err != nil {
 			stdlog.Fatal(err)
 		}
-		statikHandler := http.FileServer(statikFS)
+		staticHandler := http.FileServer(http.FS(staticFS))
 		v1Handler := v1.New(reg, logger, opts.id, opts.wlanInterface, actions)
 		h := func(w http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(r.URL.Path, "/api/") {
@@ -209,7 +210,7 @@ func main() {
 				return
 			}
 			if _, ok := knownPaths[r.URL.Path]; ok {
-				index, err := statikFS.Open("/index.html")
+				index, err := staticFS.Open("index.html")
 				if err != nil {
 					panic(err)
 				}
@@ -219,7 +220,7 @@ func main() {
 				}
 				fmt.Fprint(w, strings.Replace(string(indexHTML), "configuration={}", "configuration="+string(j), 1))
 			} else {
-				statikHandler.ServeHTTP(w, r)
+				staticHandler.ServeHTTP(w, r)
 			}
 		}
 		s := http.Server{
