@@ -10,7 +10,6 @@ require (
 	github.com/metalmatze/signal v0.0.0-20201002155117-1bb3cf83a279
 	github.com/oklog/run v1.1.0
 	github.com/prometheus/client_golang v1.8.0
-	github.com/rakyll/statik v0.1.7
 	github.com/spf13/pflag v1.0.5
 	github.com/vishvananda/netlink v1.1.0
 	golang.org/x/lint v0.0.0-20190930215403-16217165b5de

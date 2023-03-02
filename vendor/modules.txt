@@ -53,9 +53,6 @@ github.com/prometheus/common/model
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
-# github.com/rakyll/statik v0.1.7
-## explicit
-github.com/rakyll/statik/fs
 # github.com/spf13/pflag v1.0.5
 ## explicit
 github.com/spf13/pflag
