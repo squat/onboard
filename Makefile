@@ -4,7 +4,8 @@ export GO111MODULE=on
 ARCH ?= amd64
 ALL_ARCH := amd64 arm arm64
 DOCKER_ARCH := "amd64" "arm v7" "arm64 v8"
-BINS := $(addprefix bin/$(ARCH)/,onboard)
+BIN_DIR := bin
+BINS := $(addprefix $(BIN_DIR)/$(ARCH)/,onboard)
 PROJECT := onboard
 PKG := github.com/squat/$(PROJECT)
 REGISTRY ?= index.docker.io
@@ -20,7 +21,7 @@ ifneq ($(TAG),)
 endif
 DIRTY := $(shell test -z "$$(git diff --shortstat 2>/dev/null)" || echo -dirty)
 VERSION := $(VERSION)$(DIRTY)
-LD_FLAGS := -ldflags '-X $(PKG)/version.Version=$(VERSION) -extldflags "-static"'
+LD_FLAGS := -ldflags "-X $(PKG)/version.Version=$(VERSION) -extldflags -static"
 SRC := $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 STATIC_SRC := $(shell find ./static/{src,public} -type f)
 GO_FILES ?= $$(find . -name '*.go' -not -path './vendor/*')
@@ -58,23 +59,36 @@ all-container-latest: $(addprefix container-latest-, $(ALL_ARCH))
 
 all-push-latest: $(addprefix push-latest-, $(ALL_ARCH))
 
-$(BINS): $(SRC) go.mod static/build/index.html
-	@mkdir -p bin/$(ARCH)
-	@echo "building: $@"
-	@docker run --rm \
+CONTAINERIZE_BUILD ?= true
+BUILD_PREFIX :=
+BUILD_SUFIX :=
+ifeq ($(CONTAINERIZE_BUILD), true)
+	BUILD_PREFIX := docker run --rm \
 	    -u $$(id -u):$$(id -g) \
-	    -v $$(pwd):/$(PROJECT) \
-	    -w /$(PROJECT) \
+	    -v $$(pwd):/src \
+	    -w /src \
+	    --entrypoint '' \
 	    $(BUILD_IMAGE) \
-	    /bin/sh -c " \
-	        GOARCH=$(ARCH) \
+	    /bin/sh -c ' \
+	        GOCACHE=$$(pwd)/.cache
+	BUILD_SUFIX := '
+endif
+
+$(BINS): $(SRC) go.mod static/build/index.html
+	@mkdir -p $(BIN_DIR)/$(word 2,$(subst /, ,$@))
+	@echo "building: $@"
+	@$(BUILD_PREFIX) \
+	        GOARCH=$(word 2,$(subst /, ,$@)) \
 	        GOOS=linux \
-	        GOCACHE=/$(PROJECT)/.cache \
 		CGO_ENABLED=0 \
-		go build -mod=vendor -o $@ \
+		go build -o $@ \
 		    $(LD_FLAGS) \
 		    . \
-	    "
+	$(BUILD_SUFIX)
+
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
+
 static-build: static/build/index.html
 static/build/index.html: $(STATIC_SRC) static/node_modules
 	yarn --cwd static run build
@@ -217,8 +231,12 @@ bin-clean:
 	rm -rf bin
 
 vendor:
-	go mod tidy
-	go mod vendor
+	@$(BUILD_PREFIX) \
+		go mod tidy \
+	$(BUILD_SUFIX)
+	@$(BUILD_PREFIX) \
+		go mod vendor \
+	$(BUILD_SUFIX)
 
 tmp/help.txt: bin/$(ARCH)/onboard
 	mkdir -p tmp
@@ -228,7 +246,11 @@ README.md: $(EMBEDMD_BINARY) tmp/help.txt
 	$(EMBEDMD_BINARY) -w $@
 
 $(GOLINT_BINARY): go.mod go.sum
-	go build -mod=vendor -o $@ golang.org/x/lint/golint
+	@$(BUILD_PREFIX) \
+		go build -o $@ golang.org/x/lint/golint \
+	$(BUILD_SUFIX)
 
 $(EMBEDMD_BINARY): go.mod go.sum
-	go build -mod=vendor -o $@ github.com/campoy/embedmd
+	@$(BUILD_PREFIX) \
+		go build -o $@ github.com/campoy/embedmd \
+	$(BUILD_SUFIX)
