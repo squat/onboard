@@ -46,7 +46,7 @@ export enum SystemdSubState {
     Start = "start",
 }
 
-interface JoinResponse {
+interface SystemdResponse {
     result: SystemdResult
     subState: SystemdSubState
 };
@@ -69,7 +69,7 @@ interface Client {
     link(): Promise<LinkResponse|ErrorResponse>
     log(name: string, append: (logs: LogEntry[]) => void): () => void
     onboard(request: string): Promise<OnboardResponse|ErrorResponse>
-    systemd(unit: string): Promise<JoinResponse|ErrorResponse>
+    systemd(unit: string): Promise<SystemdResponse|ErrorResponse>
 };
 
 export const client: Client = {
@@ -86,9 +86,9 @@ export const client: Client = {
             });
         });
     },
-    systemd: (unit: string): Promise<JoinResponse|ErrorResponse> => {
+    systemd: (unit: string): Promise<SystemdResponse|ErrorResponse> => {
         return fetch("/api/v1/status/systemd?"+ new URLSearchParams({"unit": unit})).then(r => {
-            return r.json().then((rr: JoinResponse|ErrorResponse) => {
+            return r.json().then((rr: SystemdResponse|ErrorResponse) => {
                 if (r.ok) {
                     return rr;
                 }
